@@ -1,5 +1,5 @@
 # %% ----- imports
-from re_nlse_joint_5level import EDF
+from edf.re_nlse_joint_5level import EDF
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
 

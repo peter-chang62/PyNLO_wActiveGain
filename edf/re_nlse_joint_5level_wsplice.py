@@ -10,7 +10,7 @@ from scipy.constants import c, h
 import pynlo
 from scipy.integrate import RK45
 import collections
-from five_level_ss_eqns import (
+from edf.five_level_ss_eqns import (
     _n1_func,
     _n2_func,
     _n3_func,

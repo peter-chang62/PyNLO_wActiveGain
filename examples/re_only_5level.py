@@ -4,6 +4,9 @@ time including pump excited state absorption (ESA).
 """
 
 # %% ----- imports
+import sys
+
+sys.path.append("../")
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import InterpolatedUnivariateSpline
@@ -12,7 +15,7 @@ import clipboard
 import pandas as pd
 from scipy.constants import c
 from scipy.integrate import odeint
-from five_level_ss_eqns import (
+from edf.five_level_ss_eqns import (
     eps_p,
     xi_p,
     eps_s,
@@ -45,7 +48,7 @@ km = 1e3
 W = 1.0
 
 # %% -------------- load absorption coefficients from NLight ------------------
-sigma = pd.read_excel("NLight_provided/Erbium Cross Section - nlight_pump+signal.xlsx")
+sigma = pd.read_excel("../edf/NLight_provided/Erbium Cross Section - nlight_pump+signal.xlsx")
 sigma = sigma.to_numpy()[1:].astype(float)[:, [0, 2, 3]]
 a = sigma[:, :2]
 e = sigma[:, [0, 2]]
