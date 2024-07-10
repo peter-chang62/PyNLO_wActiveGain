@@ -4,15 +4,15 @@ import sys
 sys.path.append("../")
 import numpy as np
 import matplotlib.pyplot as plt
-import pynlo
-import clipboard
-import pandas as pd
-from scipy.constants import c
-from edf.re_nlse_joint_5level import EDF
-from edf import edfa
+import clipboard  # for clipboard
 import collections
-from scipy.interpolate import InterpolatedUnivariateSpline
+from scipy.constants import c
+
+import pynlo
+from edf.re_nlse_joint_5level import EDF
 import blit
+from edf import edfa
+from edf.utility import crossSection, ER80_4_125_betas
 
 ns = 1e-9
 ps = 1e-12
@@ -47,37 +47,11 @@ def propagate(fiber, pulse, length):
 
 
 # %% -------------- load absorption coefficients from NLight ------------------
-sigma = pd.read_excel("../edf/NLight_provided/Erbium Cross Section - nlight_pump+signal.xlsx")
-sigma = sigma.to_numpy()[1:].astype(float)[:, [0, 2, 3]]
-a = sigma[:, :2]
-e = sigma[:, [0, 2]]
-
-spl_sigma_a = InterpolatedUnivariateSpline(
-    c / a[:, 0][::-1], a[:, 1][::-1], ext="zeros"
-)
-
-spl_sigma_e = InterpolatedUnivariateSpline(
-    c / e[:, 0][::-1], e[:, 1][::-1], ext="zeros"
-)
-
+spl_sigma_a = crossSection().sigma_a
+spl_sigma_e = crossSection().sigma_e
 
 # %% -------------- load dispersion coefficients ------------------------------
-frame = pd.read_excel(
-    "../edf/NLight_provided/nLIGHT Er80-4_125-HD-PM simulated fiber dispersion.xlsx"
-)
-# frame = pd.read_excel(
-#     "../edf/NLight_provided/nLIGHT_Er110-4_125-PM_simulated_GVD_dispersion.xlsx"
-# )
-
-gvd = frame.to_numpy()[:, :2][1:].astype(float)
-wl = gvd[:, 0] * 1e-9
-omega = 2 * np.pi * c / wl
-omega0 = 2 * np.pi * c / 1560e-9
-polyfit = np.polyfit(omega - omega0, gvd[:, 1], deg=3)
-polyfit = polyfit[::-1]  # lowest order first
-
-# D_g = -12.5
-# polyfit = np.array([-(1560e-9**2) / (2 * np.pi * c) * (D_g * ps / nm / km)])
+polyfit = ER80_4_125_betas().polyfit
 
 # %% ------------- pulse ------------------------------------------------------
 f_r = 100e6
@@ -150,6 +124,10 @@ l_p_l = l_p - l_p_s * 2  # passive fiber in loop
 
 assert np.all(np.array([l_g, l_p_s, l_p_l]) >= 0)
 print(f"normal gain: {l_g}, straight: {l_p_s}, passive in loop: {l_p_l}")
+
+# initialize to noise, do this if you want to simulate mode-locking!
+pulse.a_t[:] = np.random.uniform(0, 1, size=pulse.n)
+pulse.e_p = 0.1e-6 / f_r  # .1 microwats
 
 p_gf = pulse.copy()  # gain first
 p_pf = pulse.copy()  # passive first

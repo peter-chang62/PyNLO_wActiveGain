@@ -4,15 +4,15 @@ import sys
 sys.path.append("../")
 import numpy as np
 import matplotlib.pyplot as plt
-import pynlo
-import clipboard
-import pandas as pd
+import clipboard  # for clipboard
 from scipy.constants import c
-from edf.re_nlse_joint_5level_wsplice import EDF
-import edf.edfa_wsplice as edfa
 import collections
-from scipy.interpolate import InterpolatedUnivariateSpline
+
 import blit
+import pynlo
+from edf.re_nlse_joint_5level_wsplice import EDF
+from edf.utility import crossSection, ER110_4_125_betas
+import edf.edfa_wsplice as edfa
 
 ns = 1e-9
 ps = 1e-12
@@ -48,39 +48,11 @@ def propagate(fiber, pulse, length):
 
 
 # %% -------------- load absorption coefficients from NLight ------------------
-sigma = pd.read_excel(
-    "../edf/NLight_provided/Erbium Cross Section - nlight_pump+signal.xlsx"
-)
-sigma = sigma.to_numpy()[1:].astype(float)[:, [0, 2, 3]]
-a = sigma[:, :2]
-e = sigma[:, [0, 2]]
-
-spl_sigma_a = InterpolatedUnivariateSpline(
-    c / a[:, 0][::-1], a[:, 1][::-1], ext="zeros"
-)
-
-spl_sigma_e = InterpolatedUnivariateSpline(
-    c / e[:, 0][::-1], e[:, 1][::-1], ext="zeros"
-)
-
+spl_sigma_a = crossSection().sigma_a
+spl_sigma_e = crossSection().sigma_e
 
 # %% -------------- load dispersion coefficients from NLight ------------------
-# frame_normal = pd.read_excel(
-#     "../edf/NLight_provided/nLIGHT Er80-4_125-HD-PM simulated fiber dispersion.xlsx"
-# )
-frame_normal = pd.read_excel(
-    "../edf/NLight_provided/nLIGHT_Er110-4_125-PM_simulated_GVD_dispersion.xlsx"
-)
-gvd_n = frame_normal.to_numpy()[:, :2][1:].astype(float)
-
-wl = gvd_n[:, 0] * 1e-9
-omega = 2 * np.pi * c / wl
-omega0 = 2 * np.pi * c / 1560e-9
-polyfit_n_1 = np.polyfit(omega - omega0, gvd_n[:, 1], deg=3)
-polyfit_n_1 = polyfit_n_1[::-1]  # lowest order first
-
-# D_g_1 = -12.5
-# polyfit_n_1 = np.array([-(1550e-9**2) / (2 * np.pi * c) * (D_g_1 * ps / nm / km)])
+polyfit_n_1 = ER110_4_125_betas().polyfit
 
 D_g_2 = 18
 polyfit_n_2 = np.array([-(1550e-9**2) / (2 * np.pi * c) * (D_g_2 * ps / nm / km)])
@@ -161,8 +133,8 @@ edf = EDF(
     overlap_s=1.0,
     n_ion_1=n_ion_1,
     n_ion_2=n_ion_2,
-    z_spl=l_g_1,  # test case of only one fiber
-    loss_spl=1.0,  # only a small coresize difference
+    z_spl=l_g_1,
+    loss_spl=loss,
     a_eff_1=a_eff_1,
     a_eff_2=a_eff_2,
     gamma_1=gamma_edf_1 / (W * km),
@@ -210,13 +182,8 @@ while not done:
     # ------------- gain fiber first --------------------------
     if include_loss:
         p_gf.p_v[:] *= loss  # splice from splitter to gain
-        pass  # splice from splitter to anomalous edf is losseless?
 
     # ------------- passive fiber first --------------------------
-    # passive fiber
-    # p_pf.a_t[:] = propagate(pm1550, p_pf, l_p_l * 4 / 5).sim.pulse_out.a_t[:]
-    # p_gf.a_t[:] = propagate(pm1550, p_gf, l_p_l * 1 / 5).sim.pulse_out.a_t[:]
-
     p_pf.a_t[:] = propagate(pm1550, p_pf, l_p_l).sim.pulse_out.a_t[:]
 
     if include_loss:
@@ -244,15 +211,10 @@ while not done:
         p_gf.p_v[:] *= loss  # splice from gain to phase bias
         p_gf.p_v[:] *= loss  # phase bias insertion loss
 
-    # passive fiber
-    # p_pf.a_t[:] = propagate(pm1550, p_pf, l_p_l * 1 / 5).sim.pulse_out.a_t[:]
-    # p_gf.a_t[:] = propagate(pm1550, p_gf, l_p_l * 4 / 5).sim.pulse_out.a_t[:]
-
     p_gf.a_t[:] = propagate(pm1550, p_gf, l_p_l).sim.pulse_out.a_t[:]
 
     if include_loss:
         p_pf.p_v[:] *= loss  # splice from gain to splitter
-        pass  # splice from anomalus edf to splitter is losseless?
 
     # ------------- back to splitter --------------------------
     p_s.a_t[:] = p_gf.a_t[:] * np.exp(1j * phi) / 2**0.5 + p_pf.a_t[:] / 2**0.5

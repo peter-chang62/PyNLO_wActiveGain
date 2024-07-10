@@ -9,10 +9,8 @@ import sys
 sys.path.append("../")
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.interpolate import InterpolatedUnivariateSpline
 import pynlo
 import clipboard
-import pandas as pd
 from scipy.constants import c
 from scipy.integrate import odeint
 from edf.five_level_ss_eqns import (
@@ -31,6 +29,7 @@ from edf.five_level_ss_eqns import (
     n4_func,
     n5_func,
 )
+from edf.utility import crossSection
 
 # selectively turn off effects:
 # eps_s = 0  # signal esa
@@ -48,19 +47,8 @@ km = 1e3
 W = 1.0
 
 # %% -------------- load absorption coefficients from NLight ------------------
-sigma = pd.read_excel("../edf/NLight_provided/Erbium Cross Section - nlight_pump+signal.xlsx")
-sigma = sigma.to_numpy()[1:].astype(float)[:, [0, 2, 3]]
-a = sigma[:, :2]
-e = sigma[:, [0, 2]]
-
-spl_sigma_a = InterpolatedUnivariateSpline(
-    c / a[:, 0][::-1], a[:, 1][::-1], ext="zeros"
-)
-
-spl_sigma_e = InterpolatedUnivariateSpline(
-    c / e[:, 0][::-1], e[:, 1][::-1], ext="zeros"
-)
-
+spl_sigma_a = crossSection().sigma_a
+spl_sigma_e = crossSection().sigma_e
 
 # %% ------------- pulse ------------------------------------------------------
 loss_ins = 10 ** (-0.7 / 10)
