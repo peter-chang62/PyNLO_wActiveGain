@@ -283,3 +283,9 @@ while not done:
         oc_percent,
         error,
     )
+
+    # s = str(loop_count)
+    # if len(s) < 2:
+    #     s = "0" + s
+    # filename = "fig/" + s + ".png"
+    # fig.savefig(filename, dpi=300, transparent=True)
