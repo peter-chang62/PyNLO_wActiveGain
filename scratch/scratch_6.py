@@ -550,8 +550,8 @@ class Mode(pynlo.media.Mode):
         while self.rk45_Pp.t < self.z:
             self.rk45_Pp.step()
 
-            # do it outside while loop?
-            self.update_n()
+        # do it outside while loop?
+        self.update_n()
 
 
 class Model_EDF(pynlo.model.Model):
