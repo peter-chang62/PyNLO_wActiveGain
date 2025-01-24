@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scratch_7 as edfa
 import collections
-from edf.utility import crossSection, ER80_4_125_betas
+from edf.utility import crossSection
 
 
 ns = 1e-9
@@ -49,8 +49,7 @@ spl_sigma_a = crossSection().sigma_a
 spl_sigma_e = crossSection().sigma_e
 
 # %% -------------- load dispersion coefficients ------------------------------
-# gamma_a = 1.2 / (W * km)
-gamma_a = 0
+gamma_a = 0 / (W * km)
 
 # %% ------------- pulse ------------------------------------------------------
 f_r = 1e9
@@ -74,45 +73,33 @@ pulse = pynlo.light.Pulse.Sech(
 )
 dv_dl = pulse.v_grid**2 / c  # J / Hz -> J / m
 
-# %% ---------- optional passive fiber ----------------------------------------
-# dcf = pynlo.materials.SilicaFiber()
-# D_g_2 = -100
-# polyfit = np.array([-(1550e-9**2) / (2 * np.pi * c) * (D_g_2 * ps / nm / km)])
-# dcf.set_beta_from_beta_n(v0, polyfit)
-# dcf.gamma = 1e-20
-
-length_dcf = 10
-# # ignore numpy error if length = 0.0, it occurs when n_records is not None and
-# # propagation length is 0, the output pulse is still correct
-# model_dcf, sim_dcf = propagate(dcf, pulse, length_dcf)
-# pulse_dcf = sim_dcf.pulse_out
-
-pulse_dcf = pulse
-
 # %% ------------ active fiber ------------------------------------------------
-r_eff_a = 6 * um
-a_eff_a = np.pi * r_eff_a**2
-n_ion_n = 75 / 10 * np.log(10) / spl_sigma_a(c / 1530e-9)
-n_ion_Y = n_ion_n * 10
+n_ion = 55 / 10 * np.log(10) / spl_sigma_a(c / 1530e-9)  # dB/m absorption at 1530 nm
+r_eff = 5.5 * um
+a_eff = np.pi * r_eff**2
+n_ion_Y = n_ion * 10
+
+overlap_p = 5.5**2 / 65**2
+overlap_s = 1.0
 
 sigma_a = spl_sigma_a(pulse.v_grid)
 sigma_e = spl_sigma_e(pulse.v_grid)
 sigma_p = spl_sigma_a(c / 980e-9)
 
-length = 2
+length = 6.0
 
 edf = EDF(
     f_r=f_r,
-    overlap_p=6**2 / 52**2,
+    overlap_p=overlap_p,
     overlap_s=1.0,
-    n_ion=n_ion_n,
+    n_ion=n_ion,
     n_ion_Y=n_ion_Y,
-    a_eff=a_eff_a,
+    a_eff=a_eff,
     sigma_p=sigma_p,
     sigma_a=sigma_a,
     sigma_e=sigma_e,
 )
-D_g_2 = 1e-20  # pm1550 dispersion
+D_g_2 = 1e-20
 polyfit = np.array([-(1550e-9**2) / (2 * np.pi * c) * (D_g_2 * ps / nm / km)])
 edf.set_beta_from_beta_n(v0, polyfit)
 beta_n = edf._beta(pulse.v_grid)
@@ -120,11 +107,11 @@ edf.gamma = gamma_a
 
 # %% ----------- edfa ---------------------------------------------------------
 model_fwd, sim_fwd, model_bck, sim_bck = edfa.amplify(
-    p_fwd=pulse_dcf,
+    p_fwd=pulse,
     p_bck=None,
     edf=edf,
     length=length,
-    Pp_fwd=5,
+    Pp_fwd=18,
     Pp_bck=0,
     n_records=100,
 )
@@ -143,7 +130,6 @@ na = sim.na_n
 nb = sim.nb_n
 
 fig = plt.figure(
-    num=f"power evolution for {length} normal edf and {length_dcf} dcf pre-chirp",
     figsize=np.array([11.16, 5.21]),
 )
 ax1 = fig.add_subplot(1, 2, 1)
@@ -170,12 +156,9 @@ fig.tight_layout()
 
 sim.plot(
     "wvl",
-    num=f"spectral evolution for {length} normal edf and {length_dcf} dcf pre-chirp",
 )
 
-fig, ax = plt.subplots(
-    1, 2, num=f"output for {length} normal edf and {length_dcf} dcf pre-chirp"
-)
+fig, ax = plt.subplots(1, 2)
 p_wl = sim.p_v * dv_dl
 ax[0].plot(pulse.wl_grid * 1e9, p_wl[0] / p_wl[0].max())
 ax[0].plot(pulse.wl_grid * 1e9, p_wl[-1] / p_wl[-1].max())

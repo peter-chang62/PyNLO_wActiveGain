@@ -98,12 +98,11 @@ sigma_a = spl_sigma_a(pulse.v_grid)
 sigma_e = spl_sigma_e(pulse.v_grid)
 
 n_ion = 75 / 10 * np.log(10) / spl_sigma_a(c / 1530e-9)  # dB/m absorption at 1530 nm
-r_eff = 6 * um / 2
+r_eff = 6 * um
 a_eff = np.pi * r_eff**2
 nu_p = c / 980e-9
 
 overlap_p = 6**2 / 52**2
-overlap_p = 0.1
 overlap_s = 1.0
 
 

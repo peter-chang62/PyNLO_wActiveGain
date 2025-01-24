@@ -35,6 +35,7 @@ from scratch import (
     dnb_dt_func,
     dPp_dz,
     dPs_dz,
+    gain,
 )
 
 from edf.utility import crossSection
@@ -80,14 +81,14 @@ sigma_p = spl_sigma_a(c / 980e-9)
 sigma_a = spl_sigma_a(pulse.v_grid)
 sigma_e = spl_sigma_e(pulse.v_grid)
 
-n_ion = 75 / 10 * np.log(10) / spl_sigma_a(c / 1530e-9)  # dB/m absorption at 1530 nm
-r_eff = 6 * um / 2
+n_ion = 55 / 10 * np.log(10) / spl_sigma_a(c / 1530e-9)  # dB/m absorption at 1530 nm
+r_eff = 5.5 * um
 a_eff = np.pi * r_eff**2
 nu_p = c / 980e-9
 
 n_ion_Y = n_ion * 10
 
-overlap_p = 6**2 / 52**2
+overlap_p = 5.5**2 / 65**2
 overlap_s = 1.0
 
 
@@ -242,16 +243,15 @@ def func(X, z, output="deriv"):
         eps_p,
     )
 
-    dP_v = dPs_dz(
+    dP_v = gain(
         overlap_s,
-        P_v,
         n1,
         n2,
         n_ion,
         sigma_a,
         sigma_e,
         eps_s,
-    )
+    ) * P_v
 
     print(z)
 
@@ -261,9 +261,9 @@ def func(X, z, output="deriv"):
         return sol[-1]
 
 
-Pp_0 = 5
+Pp_0 = 18
 Pv_0 = pulse.p_v.copy() * pulse.dv * f_r
-length = 2
+length = 6
 
 X_0 = np.hstack((Pp_0, Pv_0))
 z = np.linspace(0, length, 1000)

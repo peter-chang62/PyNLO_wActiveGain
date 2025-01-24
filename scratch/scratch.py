@@ -19,16 +19,13 @@ cm = 1e-2
 km = 1e3
 W = 1.0
 
-# pump emission and esa cross-sections
-# Barmenkov et al.
-
 # I think the Er stimulated emission and ESA at 980 nm -> 0 in the case of Yb
 # co-doping, I don't see it in any EYDF publications (Han et al. 2010, Dong et
 # al. 2023)
-
 xi_p = 0  # sigma_31 / sigma_13: ratio of sigma_e to sigma_a at 980 nm
 eps_p = 0  # sigma_35 / sigma_13: ratio of sigma_esa to sigma_a at 980 nm
-eps_s = 0.17  # sigma_24/sigma_12: ratio of sigma_esa to sigma_a for the signal
+# eps_s = 0.17  # sigma_24/sigma_12: ratio of sigma_esa to sigma_a for the signal
+eps_s = 0.12  # sigma_24/sigma_12: ratio of sigma_esa to sigma_a for the signal
 
 # Q. Han, J. Ning, and Z. Sheng, "Numerical Investigation of the ASE and Power
 # Scaling of Cladding-Pumped Er–Yb Codoped Fiber Amplifiers," IEEE J. Quantum
@@ -39,7 +36,7 @@ tau_21 = 10 * ms  # erbium excited state lifetime
 tau_ba = 1.5 * ms  # ytterbium excited state lifetime
 
 # much faster than barmenkov et al., er pump excited state is basically unpopulated
-tau_32 = 1.0 * ns
+tau_32 = 1 * ns
 
 # the following lifetimes are taken to copy the results of Han et al. they
 # basically make the esa and stimulated emission cross-section for the Er
@@ -47,11 +44,25 @@ tau_32 = 1.0 * ns
 tau_43 = 1.0 * ns  # er signal esa level basically unpopulated
 tau_54 = 1.0 * ns  # er pump esa level basically unpopulated
 
+# ----------------------------
+# pump emission and esa cross-sections
+# Barmenkov et al.
+# xi_p = 0  # sigma_31 / sigma_13: ratio of sigma_e to sigma_a at 980 nm
+# eps_p = 0  # sigma_35 / sigma_13: ratio of sigma_esa to sigma_a at 980 nm
+# eps_s = 0.17  # sigma_24/sigma_12: ratio of sigma_esa to sigma_a for the signal
+
+# lifetimes
+# tau_21 = 10 * ms
+# tau_32 = 5.2 * us
+# tau_43 = 5 * ns
+# tau_54 = 1 * us
+
+# ----------------------------
 
 # cross-relaxation between Yb <-> Er
 R = 2.371e-22  # m^3/s
-sigma_a_p_Y = 1.2e-20 * cm**2
-sigma_e_p_Y = 1.2e-20 * cm**2
+sigma_a_p_Y = 1.2e-24  # m^2
+sigma_e_p_Y = 1.2e-24  # m^2
 
 
 def dn1_dt(
