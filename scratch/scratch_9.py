@@ -56,10 +56,10 @@ f_r = 100e6
 e_p = 100e-3 / f_r
 
 n = 256
-v_min = c / 1700e-9
+v_min = c / 1850e-9
 v_max = c / 1400e-9
 v0 = c / 1550e-9
-t_fwhm = 100e-15
+t_fwhm = 50e-15
 min_time_window = 250e-12
 pulse = pynlo.light.Pulse.Sech(
     n,
@@ -80,7 +80,7 @@ polyfit = np.array([-(1550e-9**2) / (2 * np.pi * c) * (D_g_2 * ps / nm / km)])
 dcf.set_beta_from_beta_n(v0, polyfit)
 dcf.gamma = 0
 
-length_dcf = 10.0
+length_dcf = 8.0
 model_dcf, sim_dcf = propagate(dcf, pulse, length_dcf)
 pulse_dcf = sim_dcf.pulse_out
 
@@ -122,9 +122,10 @@ model_fwd, sim_fwd, model_bck, sim_bck = edfa.amplify(
     p_bck=None,
     edf=edf,
     length=length,
-    Pp_fwd=18,
+    Pp_fwd=20,
     Pp_bck=0,
     n_records=100,
+    raman_on=True,
 )
 sim = sim_fwd
 
@@ -139,6 +140,8 @@ n4 = sim.n4_n
 n5 = sim.n5_n
 na = sim.na_n
 nb = sim.nb_n
+
+print("output power is: ", sol_Ps[-1])
 
 fig = plt.figure(
     figsize=np.array([11.16, 5.21]),
@@ -165,9 +168,7 @@ ax2.set_xlabel("position (m)")
 ax2.set_ylabel("population inversion")
 fig.tight_layout()
 
-sim.plot(
-    "wvl",
-)
+sim.plot("wvl")
 
 fig, ax = plt.subplots(1, 2)
 p_wl = sim.p_v * dv_dl
