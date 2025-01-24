@@ -742,7 +742,7 @@ class Model_EDF(pynlo.model.Model):
         g_v[0, :] = self.mode.gain(None, None)
 
         # Step Size
-        dz = 1e-3
+        dz = dz_min
 
         # Plotting
         if plot is not None:

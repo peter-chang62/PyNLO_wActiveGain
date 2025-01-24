@@ -25,12 +25,11 @@ W = 1.0
 xi_p = 0  # sigma_31 / sigma_13: ratio of sigma_e to sigma_a at 980 nm
 eps_p = 0  # sigma_35 / sigma_13: ratio of sigma_esa to sigma_a at 980 nm
 # eps_s = 0.17  # sigma_24/sigma_12: ratio of sigma_esa to sigma_a for the signal
-eps_s = 0.12  # sigma_24/sigma_12: ratio of sigma_esa to sigma_a for the signal
+eps_s = 0.15  # sigma_24/sigma_12: ratio of sigma_esa to sigma_a for the signal
 
 # Q. Han, J. Ning, and Z. Sheng, "Numerical Investigation of the ASE and Power
 # Scaling of Cladding-Pumped Er–Yb Codoped Fiber Amplifiers," IEEE J. Quantum
 # Electron. 46, 1535–1541 (2010).
-
 # lifetimes
 tau_21 = 10 * ms  # erbium excited state lifetime
 tau_ba = 1.5 * ms  # ytterbium excited state lifetime
