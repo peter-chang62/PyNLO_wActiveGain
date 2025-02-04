@@ -73,7 +73,6 @@ pulse = pynlo.light.Pulse.Sech(
     alias=2,
 )
 
-
 # %% -------------------------------------------------------------------------
 sigma_p = spl_sigma_a(c / 980e-9)
 sigma_a = spl_sigma_a(pulse.v_grid)

@@ -1,3 +1,8 @@
+"""
+also using the amplify function from scratch_7, this time setting a nonzero
+gamma, and stretching in dcf beforehand
+
+"""
 # %% ----- imports
 import sys
 
@@ -80,7 +85,7 @@ polyfit = np.array([-(1550e-9**2) / (2 * np.pi * c) * (D_g_2 * ps / nm / km)])
 dcf.set_beta_from_beta_n(v0, polyfit)
 dcf.gamma = 0
 
-length_dcf = 8.0
+length_dcf = 10.0
 model_dcf, sim_dcf = propagate(dcf, pulse, length_dcf)
 pulse_dcf = sim_dcf.pulse_out
 
@@ -97,7 +102,7 @@ sigma_a = spl_sigma_a(pulse.v_grid)
 sigma_e = spl_sigma_e(pulse.v_grid)
 sigma_p = spl_sigma_a(c / 980e-9)
 
-length = 5.0
+length = 4.5
 
 edf = EDF(
     f_r=f_r,
@@ -122,7 +127,7 @@ model_fwd, sim_fwd, model_bck, sim_bck = edfa.amplify(
     p_bck=None,
     edf=edf,
     length=length,
-    Pp_fwd=20,
+    Pp_fwd=18,
     Pp_bck=0,
     n_records=100,
     raman_on=True,
